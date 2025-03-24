@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Teacher Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.2);
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h2, h3, p {
+            margin: 10px 0;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Random Question:</h2>
+        <p id="question">Click "Get Question" to start!</p>
+        <button onclick="getRandomQuestion()">🎲 Get Question</button>
+
+        <h2>Enter Your Answer:</h2>
+        <textarea id="answer" rows="4"></textarea><br>
+        
+        <button onclick="submitAnswer()">Submit</button>
+        <button onclick="recordSpeech()">🎤 Speak</button>
+
+        <h3>Grade: <span id="grade"></span></h3>
+        <h3>Feedback: <span id="feedback"></span></h3>
+    </div>
+
+    <script>
+        async function getRandomQuestion() {
+            let response = await fetch("http://127.0.0.1:5000/random-question");
+            let result = await response.json();
+            document.getElementById("question").innerText = result.question;
+        }
+
+        async function submitAnswer() {
+            let studentAnswer = document.getElementById("answer").value;
+
+            let response = await fetch("http://127.0.0.1:5000/grade", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ "answer": studentAnswer })
+            });
+
+            let result = await response.json();
+            document.getElementById("grade").innerText = result.grade || "Error";
+            document.getElementById("feedback").innerText = result.feedback || "Try again!";
+        }
+
+        async function recordSpeech() {
+            document.getElementById("answer").value = "Listening...";
+
+            let response = await fetch("http://127.0.0.1:5000/speech");
+            let result = await response.json();
+
+            document.getElementById("answer").value = result.text;
+        }
+    </script>
+
+</body>
+</html>
